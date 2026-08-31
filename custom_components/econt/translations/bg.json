@@ -1,0 +1,144 @@
+{
+  "title": "Econt",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Настройка на Econt",
+        "description": "Проследяването с Econt не изисква акаунт или пощенски код — хъбът се създава веднага. Добавете пратки след това чрез опциите на интеграцията или услугата `econt.track_parcel`."
+      }
+    },
+    "abort": {
+      "already_configured": "Econt вече е настроен."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Опции на Econt",
+        "menu_options": {
+          "parcels": "Управление на пратки",
+          "settings": "Настройки"
+        },
+        "sections": {
+          "parcels": {
+            "name": "Пратки",
+            "data": {
+              "add": "Добавяне на пратка",
+              "remove": "Премахване на пратки"
+            },
+            "data_description": {
+              "add": "Въведете номер за проследяване на Econt, за да започнете да го проследявате. Ще го намерите в потвърждението за изпращане или в картата за пропусната доставка."
+            }
+          },
+          "delivered": {
+            "name": "Доставени пратки",
+            "data": {
+              "delivered_filter_type": "Филтриране по",
+              "delivered_filter_amount": "Брой"
+            },
+            "data_description": {
+              "delivered_filter_type": "Покажи доставени пратки от последните X дни или ограничи до последните X.",
+              "delivered_filter_amount": "Брой дни или пратки за показване."
+            }
+          },
+          "history": {
+            "name": "История на пратката",
+            "data": {
+              "include_history": "Включване на история на статуса"
+            },
+            "data_description": {
+              "include_history": "Добавя атрибут с история на всяка пратка, показващ всяка промяна на статуса (време, статус, оригинален текст). По подразбиране е изключено."
+            }
+          }
+        }
+      },
+      "parcels": {
+        "title": "Управление на пратки",
+        "data": {
+          "tracking_codes": "Номера за проследяване"
+        }
+      },
+      "settings": {
+        "title": "Настройки",
+        "data": {
+          "delivered_filter_type": "Доставени пратки: филтриране по",
+          "delivered_filter_amount": "Доставени пратки: брой",
+          "include_history": "Включване на история на статуса"
+        }
+      }
+    },
+    "error": {
+      "invalid_tracking_code": "Това не прилича на номер за проследяване на Econt.",
+      "already_tracked": "Тази пратка вече се проследява."
+    }
+  },
+  "selector": {
+    "delivered_filter_type": {
+      "options": {
+        "days": "Дни",
+        "parcels": "Брой пратки"
+      }
+    }
+  },
+  "services": {
+    "track_parcel": {
+      "name": "Проследяване на пратка",
+      "description": "Стартиране на проследяване на пратка по номер за проследяване на Econt.",
+      "fields": {
+        "tracking_code": {
+          "name": "Номер за проследяване",
+          "description": "Номерът за проследяване на Econt."
+        }
+      }
+    },
+    "untrack_parcel": {
+      "name": "Спиране на проследяване на пратка",
+      "description": "Спиране на проследяването на пратка по номер за проследяване на Econt.",
+      "fields": {
+        "tracking_code": {
+          "name": "Номер за проследяване",
+          "description": "Номерът за проследяване на Econt, който да спре да се проследява."
+        }
+      }
+    }
+  },
+  "device_automation": {
+    "trigger_type": {
+      "parcel_registered": "Регистрирана е пратка",
+      "parcel_status_changed": "Статусът на пратка се промени",
+      "parcel_delivered": "Пратка беше доставена",
+      "parcel_delivery_time_changed": "Очакваното време за доставка на пратка се промени"
+    }
+  },
+  "entity": {
+    "button": {
+      "refresh": {
+        "name": "Опресняване"
+      }
+    },
+    "calendar": {
+      "deliveries": {
+        "name": "Доставки"
+      }
+    },
+    "sensor": {
+      "incoming_parcels": {
+        "name": "Входящи пратки",
+        "unit_of_measurement": "пратки"
+      },
+      "next_delivery": {
+        "name": "Следваща доставка"
+      },
+      "delivered_parcels": {
+        "name": "Доставени пратки",
+        "unit_of_measurement": "пратки"
+      },
+      "last_update": {
+        "name": "Последно успешно обновяване"
+      },
+      "parcel": {
+        "name": "Пратка {barcode}"
+      }
+    }
+  }
+}
