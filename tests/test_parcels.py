@@ -64,6 +64,16 @@ def test_parcel_status_maps_in_transit_hub_event():
     assert parcel["delivered"] is False
 
 
+def test_parcel_status_maps_in_delivery_office():
+    raw = delivered_sample()
+    raw["shortDeliveryStatusEn"] = "In delivery office"
+    raw["shortDeliveryStatus"] = "In delivery office"
+    raw["deliveryTime"] = None
+    parcel = normalize_parcel(raw)
+    assert parcel["status"] is ParcelStatus.IN_TRANSIT
+    assert parcel["delivered"] is False
+
+
 def test_parcel_status_maps_cyrillic_canceled_before_dispatch():
     raw = delivered_sample()
     raw["shortDeliveryStatusEn"] = "Анулирана преди изпращане"

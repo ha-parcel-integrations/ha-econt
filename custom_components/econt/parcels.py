@@ -61,6 +61,10 @@ _STATUS_MAP: dict[str, ParcelStatus] = {
     "Arrival-Departure from HUB": ParcelStatus.IN_TRANSIT,
     "Анулирана преди изпращане": ParcelStatus.PROBLEM,  # "Canceled before dispatch"
     "Awaiting delivery to Econt": ParcelStatus.REGISTERED,
+    # Live-confirmed shortDeliveryStatusEn value (not the docs' "In delivery
+    # courier's office" wording). Same routing leg as the event-level
+    # "in_delivery_office" below, so mapped the same way.
+    "In delivery office": ParcelStatus.IN_TRANSIT,
 }
 _EVENT_STATUS_MAP: dict[str, ParcelStatus] = {
     "client": ParcelStatus.DELIVERED,
