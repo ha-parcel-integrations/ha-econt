@@ -41,6 +41,9 @@ you act in one of these areas:
 
 ## Carrier-specific notes
 
+**API mechanics live in `carrier-research/econt/api/` (private research repo)** —
+endpoints, envelope and status vocabulary belong there, never in this repo.
+
 Econt is code-based and unauthenticated. The coordinator makes one batch read
 per refresh and retains cached data if that read fails. Numeric shipment
 numbers are trimmed but never length-constrained; one malformed value must not
