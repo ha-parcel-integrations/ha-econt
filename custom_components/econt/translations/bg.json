@@ -16,7 +16,7 @@
       "init": {
         "title": "Опции на Econt",
         "menu_options": {
-          "parcels": "Управление на пратки",
+          "parcels": "Пратки",
           "settings": "Настройки"
         },
         "sections": {
