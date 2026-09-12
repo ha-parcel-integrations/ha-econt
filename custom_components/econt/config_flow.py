@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import logging
-import re
 from typing import Any
 
 import voluptuous as vol
@@ -30,20 +29,14 @@ from .const import (
 
 _LOGGER = logging.getLogger(__name__)
 
-# Econt has only been observed with 13 digits, but the public service accepts
-# numeric shipment numbers and no length is documented. Keep the validation
-# deliberately length-agnostic: a valid future number must not be rejected.
-_TRACKING_CODE_RE = re.compile(r"^\d+$")
-
-
 def normalize_tracking_code(value: str) -> str:
     """Return a trimmed Econt shipment number without changing its digits."""
     return (value or "").strip()
 
 
 def valid_tracking_code(value: str) -> bool:
-    """Whether ``value`` looks like an Econt tracking code."""
-    return bool(_TRACKING_CODE_RE.match(value))
+    """Accept every non-empty code; no shipment-number format is documented."""
+    return bool(value)
 
 
 def _current_parcels(entry: ConfigEntry) -> list[dict[str, str]]:

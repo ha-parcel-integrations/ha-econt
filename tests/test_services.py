@@ -1,8 +1,6 @@
 """Tests for Econt parcel registration services."""
 from unittest.mock import AsyncMock, patch
 
-import pytest
-from homeassistant.exceptions import ServiceValidationError
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 from custom_components.econt.const import CONF_PARCELS, CONF_TRACKING_CODE, DOMAIN
@@ -28,12 +26,6 @@ async def test_track_and_untrack_numeric_code(hass):
         await hass.services.async_call(DOMAIN, "untrack_parcel", {CONF_TRACKING_CODE: ACTIVE_CODE}, blocking=True)
         await hass.async_block_till_done()
     assert entry.options[CONF_PARCELS] == []
-
-
-async def test_track_rejects_non_numeric_code(hass):
-    await _setup(hass)
-    with pytest.raises(ServiceValidationError):
-        await hass.services.async_call(DOMAIN, "track_parcel", {CONF_TRACKING_CODE: "Econt"}, blocking=True)
 
 
 async def test_track_duplicate_is_noop(hass):
