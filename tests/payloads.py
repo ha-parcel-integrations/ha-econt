@@ -1,4 +1,5 @@
 """Minimal, synthetic Econt response shapes; all personal data is omitted."""
+
 from __future__ import annotations
 
 ACTIVE_CODE = "1055215517881"

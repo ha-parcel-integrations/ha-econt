@@ -1,4 +1,5 @@
 """Tests for the Econt refresh button."""
+
 from unittest.mock import AsyncMock, MagicMock
 
 from custom_components.econt.button import EcontRefreshButton

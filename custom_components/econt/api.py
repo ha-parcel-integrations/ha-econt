@@ -1,4 +1,5 @@
 """Client for Econt's public, batched shipment-status service."""
+
 from __future__ import annotations
 
 from typing import Any
@@ -11,7 +12,13 @@ from .const import TRACKING_API_URL
 class EcontApiError(Exception):
     """Raised when Econt returns a transport or unrecognised API response."""
 
-    def __init__(self, detail: str, *, status_code: int | None = None, retry_after: float | None = None) -> None:
+    def __init__(
+        self,
+        detail: str,
+        *,
+        status_code: int | None = None,
+        retry_after: float | None = None,
+    ) -> None:
         """Store the carrier response detail and optional retry metadata."""
         super().__init__(f"Econt API request failed: {detail}")
         self.detail = detail
@@ -26,30 +33,40 @@ class EcontApiClient:
         """Initialise the client with Home Assistant's shared session."""
         self._session = session
 
-    async def async_get_parcels(self, codes: list[str]) -> dict[str, dict[str, Any] | None]:
+    async def async_get_parcels(
+        self, codes: list[str]
+    ) -> dict[str, dict[str, Any] | None]:
         """Fetch codes in one request, matching results by shipment number."""
         if not codes:
             return {}
-        async with self._session.post(TRACKING_API_URL, json={"shipmentNumbers": codes}) as response:
+        async with self._session.post(
+            TRACKING_API_URL, json={"shipmentNumbers": codes}
+        ) as response:
             if response.status == 429:
                 try:
                     retry_after = float(response.headers.get("Retry-After", ""))
                 except ValueError:
                     retry_after = None
-                raise EcontApiError("HTTP 429", status_code=429, retry_after=retry_after)
+                raise EcontApiError(
+                    "HTTP 429", status_code=429, retry_after=retry_after
+                )
             if response.status != 200:
-                raise EcontApiError(f"HTTP {response.status}", status_code=response.status)
+                raise EcontApiError(
+                    f"HTTP {response.status}", status_code=response.status
+                )
             try:
                 payload = await response.json(content_type=None)
             except ValueError as err:
                 raise EcontApiError(f"unparseable body ({err})") from err
 
-        statuses = payload.get("shipmentStatuses") if isinstance(payload, dict) else None
+        statuses = (
+            payload.get("shipmentStatuses") if isinstance(payload, dict) else None
+        )
         if not isinstance(statuses, list):
             raise EcontApiError("unexpected response envelope")
 
         requested = set(codes)
-        result: dict[str, dict[str, Any] | None] = {code: None for code in codes}
+        result: dict[str, dict[str, Any] | None] = dict.fromkeys(codes)
         seen: set[str] = set()
         for item in statuses:
             if not isinstance(item, dict):

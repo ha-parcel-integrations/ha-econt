@@ -12,10 +12,11 @@ timestamp parsing, the history builder, the sort contract, the delivered
 filter, the one-shot warning for unmapped statuses — is suite-wide machinery
 and should be left alone.
 """
+
 from __future__ import annotations
 
+from datetime import UTC, datetime, time, timedelta
 import logging
-from datetime import datetime, time, timedelta, timezone
 from typing import Any
 from zoneinfo import ZoneInfo
 
@@ -162,11 +163,11 @@ def parse_iso(value: str | None) -> datetime | None:
     if not value:
         return None
     try:
-        parsed = datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+        parsed = datetime.fromisoformat(str(value))
     except ValueError:
         return None
     if parsed.tzinfo is None:
-        parsed = parsed.replace(tzinfo=timezone.utc)
+        parsed = parsed.replace(tzinfo=UTC)
     return parsed
 
 
@@ -182,7 +183,7 @@ def to_iso_timestamp(value: Any) -> str | None:
         return None
     if isinstance(value, (int, float)):
         try:
-            return datetime.fromtimestamp(value / 1000, tz=timezone.utc).isoformat()
+            return datetime.fromtimestamp(value / 1000, tz=UTC).isoformat()
         except (OverflowError, OSError, ValueError):
             return None
     return str(value)
@@ -278,7 +279,9 @@ def normalize_parcel(raw: dict, *, include_history: bool = False) -> dict:
     # 0 is a placeholder for "not weighed", not a real weight — every live
     # sample seen so far reports it that way. Any positive value is passed
     # through as-is; the API documents kilograms.
-    weight = raw_weight if isinstance(raw_weight, (int, float)) and raw_weight > 0 else None
+    weight = (
+        raw_weight if isinstance(raw_weight, (int, float)) and raw_weight > 0 else None
+    )
     raw_status = raw.get("shortDeliveryStatusEn") or raw.get("shortDeliveryStatus")
     delivered = raw.get("deliveryTime") is not None or raw_status == "Delivered"
     status = ParcelStatus.DELIVERED if delivered else map_parcel_status(raw_status)
@@ -302,7 +305,9 @@ def normalize_parcel(raw: dict, *, include_history: bool = False) -> dict:
         "status": status,
         "raw_status": raw_status,
         "delivered": delivered,
-        "delivered_at": to_iso_timestamp(raw.get("deliveryTime")) if delivered else None,
+        "delivered_at": to_iso_timestamp(raw.get("deliveryTime"))
+        if delivered
+        else None,
         "planned_from": None if delivered else planned_from,
         "planned_to": None if delivered else planned_to,
         "pickup": False,
@@ -310,7 +315,9 @@ def normalize_parcel(raw: dict, *, include_history: bool = False) -> dict:
         "url": tracking_url(tracking_code),
         "weight": weight,
         "dimensions": None,
-        "history": build_history(raw.get("trackingEvents")) if include_history else None,
+        "history": build_history(raw.get("trackingEvents"))
+        if include_history
+        else None,
         "raw": raw,
     }
 
@@ -346,14 +353,12 @@ def apply_delivered_filter(parcels: list[dict], entry: ConfigEntry) -> list[dict
     shows.
     """
     options = entry.options
-    filter_type = options.get(
-        CONF_DELIVERED_FILTER_TYPE, DEFAULT_DELIVERED_FILTER_TYPE
-    )
+    filter_type = options.get(CONF_DELIVERED_FILTER_TYPE, DEFAULT_DELIVERED_FILTER_TYPE)
     amount = int(
         options.get(CONF_DELIVERED_FILTER_AMOUNT, DEFAULT_DELIVERED_FILTER_AMOUNT)
     )
     if filter_type == "days":
-        cutoff = datetime.now(timezone.utc) - timedelta(days=amount)
+        cutoff = datetime.now(UTC) - timedelta(days=amount)
         return [
             parcel
             for parcel in parcels

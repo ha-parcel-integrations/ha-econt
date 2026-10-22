@@ -1,4 +1,5 @@
 """Tests for Econt's conservative canonical parcel mapping."""
+
 from custom_components.econt.const import CAPABILITIES, ParcelStatus
 from custom_components.econt.parcels import build_history, normalize_parcel
 
@@ -32,7 +33,8 @@ def test_unknown_current_status_has_sofia_all_day_eta_and_one_warning(caplog):
 
 def test_history_is_chronological_and_capped():
     events = [
-        event(1784200000000 + index, str(index), "in_transit") for index in range(25, 0, -1)
+        event(1784200000000 + index, str(index), "in_transit")
+        for index in range(25, 0, -1)
     ]
     history = build_history(events)
     assert len(history) == 20
@@ -106,7 +108,9 @@ def test_history_status_maps_routing_leg_events():
 
 
 def test_history_status_maps_delivery_courier_event():
-    history = build_history([event(1784200000000, "With courier", "in_delivery_courier")])
+    history = build_history(
+        [event(1784200000000, "With courier", "in_delivery_courier")]
+    )
     assert history[0]["status"] is ParcelStatus.OUT_FOR_DELIVERY
 
 
@@ -128,12 +132,16 @@ def test_history_status_maps_return_and_failure_events():
 
 
 def test_history_status_leaves_pickup_office_unmapped():
-    history = build_history([event(1784200000000, "At pickup office", "in_pickup_office")])
+    history = build_history(
+        [event(1784200000000, "At pickup office", "in_pickup_office")]
+    )
     assert history[0]["status"] is None
 
 
 def test_history_status_leaves_instruction_unmapped(caplog):
-    history = build_history([event(1784200000000, "Customer instruction", "instruction")])
+    history = build_history(
+        [event(1784200000000, "Customer instruction", "instruction")]
+    )
     assert history[0]["status"] is None
     assert "instruction" in caplog.text
 
@@ -144,7 +152,7 @@ def test_optional_and_unconfirmed_fields_are_not_advertised():
     assert parcel["dimensions"] is None
     assert parcel["pickup"] is False
     assert parcel["pickup_point"] is None
-    assert CAPABILITIES == frozenset({"delivery_window", "url", "history", "weight"})
+    assert frozenset({"delivery_window", "url", "history", "weight"}) == CAPABILITIES
 
 
 def test_weight_is_passed_through_once_populated():

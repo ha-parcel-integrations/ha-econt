@@ -1,4 +1,5 @@
 """Tests for Econt setup and unload."""
+
 from unittest.mock import AsyncMock, patch
 
 from homeassistant.config_entries import ConfigEntryState
@@ -6,14 +7,9 @@ from homeassistant.helpers import entity_registry as er
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 from custom_components.econt.api import EcontApiError
-from custom_components.econt.const import (
-    CONF_PARCELS,
-    CONF_TRACKING_CODE,
-    DOMAIN,
-)
+from custom_components.econt.const import CONF_PARCELS, CONF_TRACKING_CODE, DOMAIN
 
-from .payloads import ACTIVE_CODE
-from .payloads import active_sample as _sample
+from .payloads import ACTIVE_CODE, active_sample as _sample
 
 OTHER_CODE = "EXAMPLE222222"
 
@@ -84,7 +80,9 @@ async def test_per_parcel_sensor_spawn_and_remove(hass):
     entry.add_to_hass(hass)
 
     mock = AsyncMock(return_value={ACTIVE_CODE: _sample()})
-    with patch("custom_components.econt.api.EcontApiClient.async_get_parcels", new=mock):
+    with patch(
+        "custom_components.econt.api.EcontApiClient.async_get_parcels", new=mock
+    ):
         assert await hass.config_entries.async_setup(entry.entry_id)
         await hass.async_block_till_done()
 
@@ -95,11 +93,16 @@ async def test_per_parcel_sensor_spawn_and_remove(hass):
 
         # A batch may include a response only for registered tracking codes;
         # unknown extra response keys do not create entities.
-        mock.return_value = {ACTIVE_CODE: _sample(ACTIVE_CODE), OTHER_CODE: _sample(OTHER_CODE)}
+        mock.return_value = {
+            ACTIVE_CODE: _sample(ACTIVE_CODE),
+            OTHER_CODE: _sample(OTHER_CODE),
+        }
         await entry.runtime_data.coordinator.async_request_refresh()
         await hass.async_block_till_done()
 
-        assert registry.async_get_entity_id("sensor", DOMAIN, f"{entry.entry_id}_{ACTIVE_CODE}")
+        assert registry.async_get_entity_id(
+            "sensor", DOMAIN, f"{entry.entry_id}_{ACTIVE_CODE}"
+        )
 
 
 async def test_options_update_applies_live_without_reload(hass):
@@ -112,7 +115,9 @@ async def test_options_update_applies_live_without_reload(hass):
     entry.add_to_hass(hass)
 
     mock = AsyncMock(return_value={ACTIVE_CODE: _sample()})
-    with patch("custom_components.econt.api.EcontApiClient.async_get_parcels", new=mock):
+    with patch(
+        "custom_components.econt.api.EcontApiClient.async_get_parcels", new=mock
+    ):
         assert await hass.config_entries.async_setup(entry.entry_id)
         await hass.async_block_till_done()
 
