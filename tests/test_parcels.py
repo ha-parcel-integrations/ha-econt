@@ -26,7 +26,7 @@ def test_unknown_current_status_has_sofia_all_day_eta_and_one_warning(caplog):
     parcel = normalize_parcel(active_sample())
     assert parcel["status"] is ParcelStatus.UNKNOWN
     assert parcel["planned_from"] == "2026-07-17T00:00:00+03:00"
-    assert parcel["planned_to"] == "2026-07-17T23:59:59.999999+03:00"
+    assert parcel["planned_to"] == "2026-07-17T23:59:59+03:00"
     normalize_parcel(active_sample())
     assert caplog.text.count("In processing") == 1
 

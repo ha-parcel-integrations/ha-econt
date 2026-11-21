@@ -37,12 +37,14 @@ This repo follows it exactly.
   summary+diagnostic sensors. Add a new non-parcel sensor's unique_id to the set.
 - **Per-parcel sensors are removed by the summary sensor** via
   `entity_registry.async_remove` (self-removal races and leaves ghosts).
-- **If this carrier can reach `ParcelStatus.AT_PICKUP_POINT` from a real raw
-  status/code**, it needs an `awaiting_pickup` sensor — see *Parcel contract*
-  in `CONVENTIONS.md`. Say "pickup point", not "ServicePoint"/"parcel
-  shop"/"locker", for the generic concept. `ha-dhl-nl`, `ha-dpd`, `ha-gls`,
-  `ha-inpost` are reference implementations; `econt` here does not
-  demonstrate it yet.
+- **The pickup-point summaries are a pair.** A carrier that can deliver to a
+  pickup point or locker exposes both `en_route_to_pickup_point` and
+  `awaiting_pickup`, even before a real parcel has shown the status or flag
+  (they read 0 until then; record it in `PENDING_*`). A carrier without pickup
+  points exposes neither and keeps `pickup` constantly False.
+  See *Parcel contract* in `CONVENTIONS.md`. Say "pickup point", not
+  "ServicePoint"/"parcel shop"/"locker", for the generic concept; the
+  example carrier demonstrates both canonical sensors.
 
 ## Carrier-specific notes
 
@@ -112,12 +114,28 @@ general Cyrillic-fallback mechanism off one observed gap.
 
 Date-only expected delivery data (`expectedDeliveryDate`, epoch milliseconds
 like the other timestamp fields — not an ISO string, a real bug until this was
-caught against a live payload) is published as a Europe/Sofia all-day window.
+caught against a live payload) is published through `planned_window` as a
+Europe/Sofia `00:00:00`–`23:59:59` window, emptied by `planned_for_status`.
+`status` is computed first (a `deliveryTime` is folded into the mapping as
+`DELIVERED`, never over `RETURNING`) and `delivered` is `status is DELIVERED`.
+Parcel-level returned-to-sender is not mapped: the live string is unconfirmed,
+so a returned parcel is not `delivered` yet.
 `weight` passes `raw.weight` through whenever it is a positive number — every
 live sample so far reports `0`, a placeholder for "not weighed" rather than a
 real value, so it still normalises to `None` in
-practice. Sender/receiver and pickup point deliberately remain `None` until a
-live payload establishes a safe canonical meaning. Diagnostics redact event
+practice. Sender/receiver deliberately remain `None` until a live payload
+establishes a safe canonical meaning. **Pickup**: `pickup` is
+`is_pickup(office/locker flag, status, event statuses)`, the flag being the
+payload's `deliveryType` when present and not `door` (`None` when the key is
+absent, so it then falls back to status/history). `awaiting_pickup` and
+`en_route_to_pickup_point` sensors exist and read 0 until a parcel reaches
+`AT_PICKUP_POINT`. **Pending, unseen**: the exact `deliveryType` key/values on a
+real office parcel, and a confirmed English `shortDeliveryStatusEn` string for
+the «В офис» / «Пристигнала в офис» state (only ready-for-pickup when the reply
+names the storing office), so no status maps to `AT_PICKUP_POINT` yet and
+`in_pickup_office` stays unmapped on purpose; `pickup_point` stays `None`
+because the payload carries routing offices, not a guaranteed recipient
+office. Diagnostics redact event
 locations and client names.
 
 ## Running tests
